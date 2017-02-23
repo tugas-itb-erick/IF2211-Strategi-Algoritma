@@ -37,11 +37,22 @@ void MergeSort(vector<int> &v, size_t left, size_t right){
 }
 
 void InsertionSort(vector<int> &v, size_t left, size_t right){
-  if (left < right){
+  /*if (left < right){
     size_t mid = left;
     InsertionSort(v, left, mid);
     InsertionSort(v, mid+1, right);
     Merge(v, left, mid, right);
+  }*/
+  int temp;
+
+  for(size_t i=left+1; i<=right; i++){
+    size_t pos = i;
+    while ((pos > left) && (v[pos] < v[pos-1])){
+      temp = v[pos];
+      v[pos] = v[pos-1];
+      v[pos-1] = temp;
+      --pos;
+    }
   }
 }
 
@@ -60,10 +71,25 @@ void Select(vector<int> &v, size_t left, size_t right){
 }
 
 void SelectionSort(vector<int> &v, size_t left, size_t right){
-  if (left < right){
+  /*if (left < right){
     Select(v, left, right);
     SelectionSort(v, left+1, right);
+  }*/
+  int temp;
+  size_t imin;
+
+  for(size_t i=left; i<right; i++){
+    imin = i;
+    for(size_t j=i+1; j<=right; j++){
+      if (v[j] < v[imin])
+        imin = j;
+    }
+
+    temp = v[imin];
+    v[imin] = v[i];
+    v[i] = temp;
   }
+
 }
 
 size_t Partition(vector<int> &v, size_t left, size_t right){
