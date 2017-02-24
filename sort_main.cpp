@@ -1,4 +1,8 @@
+/* NIM/Nama : Erick Wijaya  */
+/* FIle     : sort_main.cpp */
+
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
@@ -10,36 +14,45 @@ vector<int> v(1000000);
 
 void InputData(vector<int> &v, size_t size);
 void PrintData(vector<int> &v, size_t size);
-void PrintInfo(string s, size_t d, double t);
+void PrintInfo(string s, size_t d, bool b, double t);
 
 int main(){
   size_t size[] = {1000,5000,10000,50000,100000,500000,1000000};
   clock_t start, end;
+  srand(time(NULL));
 
-  for(size_t i=5; i<6/*sizeof(size)*/; i++){
+  for(size_t i=0; i<sizeof(size)/sizeof(size_t); i++){
     InputData(v, size[i]);
     start = clock();
     MergeSort(v, 0, size[i]-1);
     end = clock();
-//    PrintData(v, size[i]);
-    PrintInfo("-- MERGE SORT --", size[i], (end-start)/(CLOCKS_PER_SEC/1000));
+    //PrintData(v, size[i]);
+    PrintInfo("-- MERGE SORT --", size[i], IsSorted(v, size[i]), (end-start)/(double)(CLOCKS_PER_SEC));
 
     InputData(v, size[i]);
     start = clock();
     InsertionSort(v, 0, size[i]-1);
     end = clock();
-  //  PrintData(v, size[i]);
-    PrintInfo("-- INSERTION SORT --", size[i], (end-start)/(CLOCKS_PER_SEC/1000));
+    //PrintData(v, size[i]);
+    PrintInfo("-- INSERTION SORT --", size[i], IsSorted(v, size[i]), (end-start)/(double)(CLOCKS_PER_SEC));
 
     InputData(v, size[i]);
     start = clock();
     SelectionSort(v, 0, size[i]-1);
     end = clock();
-//    PrintData(v, size[i]);
-    PrintInfo("-- SELECTION SORT --", size[i], (end-start)/(CLOCKS_PER_SEC/1000));
+    //PrintData(v, size[i]);
+    PrintInfo("-- SELECTION SORT --", size[i], IsSorted(v, size[i]), (end-start)/(double)(CLOCKS_PER_SEC));
+
+    InputData(v, size[i]);
+    start = clock();
+    QuickSort(v, 0, size[i]-1);
+    end = clock();
+    //PrintData(v, size[i]);
+    PrintInfo("-- QUICK SORT --", size[i], IsSorted(v, size[i]), (end-start)/(double)(CLOCKS_PER_SEC));
 
   }
 
+  return 0;
 }
 
 void InputData(vector<int> &v, size_t size){
@@ -58,16 +71,17 @@ void PrintData(vector<int> &v, size_t size){
       cout << "  ";
     else
       cout << " ";
-    if ((i+1) % 20 == 0)
+    if ((i+1) % 30 == 0)
       cout << endl;
   }
   cout << endl;
 }
 
-void PrintInfo(string s, size_t d, double t){
+void PrintInfo(string s, size_t d, bool b, double t){
   cout << s << endl;
   cout << "Data: " << d << endl;
-  cout << "Time Elapsed: " << t  << "ms" << endl << endl;
+  cout << "Sorted (0/1): " << b << endl;
+  cout << "Time Elapsed: " << setprecision(4) << t  << "s" << endl << endl;
   cout << "Press Enter to Continue" << endl;
   cin.ignore();
 }

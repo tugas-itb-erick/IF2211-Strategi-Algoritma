@@ -4,6 +4,26 @@
 #include "sort.h"
 using namespace std;
 
+void Swap(int &a, int &b){
+  int temp = a;
+  a = b;
+  b = temp;
+}
+
+bool IsSorted(vector<int> &v, size_t size){
+  bool sorted = true;
+  size_t i = 0;
+
+  while ((i < size-1) && (sorted)){
+    if (v[i] > v[i+1])
+      sorted = false;
+    else
+      i++;
+  }
+
+  return sorted;
+}
+
 void Merge(vector<int> &v, size_t left, size_t mid, size_t right){
   size_t i1 = left;
   size_t i2 = mid+1;
@@ -37,45 +57,16 @@ void MergeSort(vector<int> &v, size_t left, size_t right){
 }
 
 void InsertionSort(vector<int> &v, size_t left, size_t right){
-  /*if (left < right){
-    size_t mid = left;
-    InsertionSort(v, left, mid);
-    InsertionSort(v, mid+1, right);
-    Merge(v, left, mid, right);
-  }*/
-  int temp;
-
   for(size_t i=left+1; i<=right; i++){
     size_t pos = i;
     while ((pos > left) && (v[pos] < v[pos-1])){
-      temp = v[pos];
-      v[pos] = v[pos-1];
-      v[pos-1] = temp;
+      Swap(v[pos], v[pos-1]);
       --pos;
     }
   }
 }
 
-void Select(vector<int> &v, size_t left, size_t right){
-  int temp;
-  size_t imin = left;
-
-  for(size_t i=left+1; i<=right; i++){
-    if (v[i] < v[imin])
-      imin = i;
-  }
-
-  temp = v[imin];
-  v[imin] = v[left];
-  v[left] = temp;
-}
-
 void SelectionSort(vector<int> &v, size_t left, size_t right){
-  /*if (left < right){
-    Select(v, left, right);
-    SelectionSort(v, left+1, right);
-  }*/
-  int temp;
   size_t imin;
 
   for(size_t i=left; i<right; i++){
@@ -84,17 +75,30 @@ void SelectionSort(vector<int> &v, size_t left, size_t right){
       if (v[j] < v[imin])
         imin = j;
     }
-
-    temp = v[imin];
-    v[imin] = v[i];
-    v[i] = temp;
+    Swap(v[imin], v[i]);
   }
 
 }
 
 size_t Partition(vector<int> &v, size_t left, size_t right){
-  size_t pivot;
-  return 0;
+  int pivot = v[rand()%(right-left+1) + left]; // random pivot
+  size_t il = left;
+  size_t ir = right;
+
+  while (il <= ir) {
+    while (v[il] < pivot)
+      ++il;
+    while (v[ir] > pivot)
+      --ir;
+    if (il <= ir){
+      Swap(v[il], v[ir]);
+      ++il;
+      if (ir > left)
+      --ir;
+    }
+  }
+
+  return ir;
 }
 
 void QuickSort(vector<int> &v, size_t left, size_t right){
