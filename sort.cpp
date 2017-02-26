@@ -57,6 +57,8 @@ void MergeSort(vector<int> &v, size_t left, size_t right){
 }
 
 void InsertionSort(vector<int> &v, size_t left, size_t right){
+  int temp;
+
   for(size_t i=left+1; i<=right; i++){
     size_t pos = i;
     while ((pos > left) && (v[pos] < v[pos-1])){
