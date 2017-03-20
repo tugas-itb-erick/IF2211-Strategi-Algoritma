@@ -3,37 +3,79 @@
 
 /* Tugas Besar IF2211 Strategi Algortima 2 */
 /* Topik : DFS dan BFS */
-/* Kelompok - Aegis */
+/* Kelompok 34 - Aegis */
 /* Anggota :
- * Gisela Supardi -
+ * Gisela Supardi - 13515
  * Erick Wijaya   - 13515057
- * Audry Nyonata  -
+ * Audry Nyonata  - 13515
  */
 
-void FollowBlackLine();
+/* Aksi Bergerak */
+void MoveForward();
+void Turn(int dir);
+/* Membelokkan robot sesuai arah (dir) */
+/* dir = 1 -> left, else -> right */
+
+/* Predikat Warna */
+int IsWhite(); // TODO : Implement with RGB Value
+int IsBlue();
+int IsGreen();
+int IsRed();
+int IsYellow();
 
 task main()
 {
 
-
-
+	Turn(1);
 }
 
-void FollowBlackLine(){
-  int threshold = 65;
+void MoveForward(){
+	setMotorSpeed(leftMotor, 50);
+	setMotorSpeed(rightMotor, 50);
+}
 
-  // sensor sees light:
-  if(getColorReflected(colorSensor) < threshold)
-  {
-    // counter-steer right:
-    motor[leftMotor]  = 15;
-    motor[rightMotor] = 55;
-  }
-  // sensor sees dark:
-  else
-  {
-    // counter-steer left:
-    motor[leftMotor]  = 55;
-    motor[rightMotor] = 15;
-  }
+void Turn(int dir){
+	resetGyro(gyroSensor);
+	if (dir == 1){
+		setMotorSpeed(leftMotor, -16);
+		setMotorSpeed(rightMotor, 16);
+		repeatUntil(getGyroDegrees(gyroSensor) <= -89){}
+	}
+	else{
+		setMotorSpeed(leftMotor, 16);
+		setMotorSpeed(rightMotor, -16);
+		repeatUntil(getGyroDegrees(gyroSensor) >= 89){}
+	}
+	setMotorSpeed(leftMotor, 0);
+	setMotorSpeed(rightMotor, 0);
+}
+
+int IsWhite(){
+	if (getColorName(colorSensor) == colorWhite)
+		return 1;
+	return 0;
+}
+
+int IsBlue(){
+	if (getColorName(colorSensor) == colorBlue)
+		return 1;
+	return 0;
+}
+
+int IsGreen(){
+	if (getColorName(colorSensor) == colorGreen)
+		return 1;
+	return 0;
+}
+
+int IsRed(){
+	if (getColorName(colorSensor) == colorRed)
+		return 1;
+	return 0;
+}
+
+int IsYellow(){
+	if (getColorName(colorSensor) == colorYellow)
+		return 1;
+	return 0;
 }
