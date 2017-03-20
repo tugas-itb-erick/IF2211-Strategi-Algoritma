@@ -12,12 +12,14 @@
 
 /* Aksi Bergerak */
 void MoveForward();
+void MoveForwardTimed(int t);
 void Turn(int dir);
 /* Membelokkan robot sesuai arah (dir) */
 /* dir = 1 -> left, else -> right */
 
 /* Predikat Warna */
 int IsWhite(); // TODO : Implement with RGB Value
+int IsBlack();
 int IsBlue();
 int IsGreen();
 int IsRed();
@@ -25,13 +27,27 @@ int IsYellow();
 
 task main()
 {
-
+	while(IsWhite())
+		MoveForward();
+	while(IsBlue())
+		MoveForward();
+	while(IsBlack())
+		MoveForward();
+	MoveForwardTimed(300);
 	Turn(1);
+	Turn(2);
+	Turn(2);
 }
 
 void MoveForward(){
 	setMotorSpeed(leftMotor, 50);
 	setMotorSpeed(rightMotor, 50);
+}
+
+void MoveForwardTimed(int t){
+	setMotorSpeed(leftMotor, 30);
+	setMotorSpeed(rightMotor, 30);
+	sleep(t);
 }
 
 void Turn(int dir){
@@ -52,6 +68,12 @@ void Turn(int dir){
 
 int IsWhite(){
 	if (getColorName(colorSensor) == colorWhite)
+		return 1;
+	return 0;
+}
+
+int IsBlack(){
+	if (getColorName(colorSensor) == colorBlack)
 		return 1;
 	return 0;
 }
