@@ -10,6 +10,8 @@
  * Audry Nyonata  - 13515
  */
 
+#include "list/stack/stack.h"
+
 /* Aksi Bergerak */
 void MoveForward();
 void MoveForwardTimed(int t);
