@@ -19,13 +19,13 @@ int IsQueueEmpty(Queue * Q);
 void CreateQueue(Queue * Q);
 /* I.S. sembarang */
 /* F.S. Sebuah Q kosong terbentuk */
-void Add(Queue * Q, infotype X);
+void Push_Back(Queue * Q, infotype X);
 /* Proses: Mengalokasi X dan menambahkan X pada bagian TAIL dari Q
    jika alokasi berhasil; jika alokasi gagal Q tetap */
 /* Pada dasarnya adalah proses insert last */
 /* I.S. Q mungkin kosong */
 /* F.S. X menjadi TAIL, TAIL "maju" */
-void Del(Queue * Q, infotype * X);
+void Pop_Head(Queue * Q, infotype * X);
 /* Proses: Menghapus X pada bagian HEAD dari Q dan mendealokasi
    elemen HEAD */
 /* Pada dasarnya operasi delete first */

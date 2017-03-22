@@ -12,11 +12,11 @@ void CreateQueue(Queue * Q){
 	CreateList(Q);
 }
 
-void Add(Queue * Q, infotype X){
+void Push_Back(Queue * Q, infotype X){
 	InsertLast(Q, X);
 }
 
-void Del(Queue * Q, infotype * X){
+void Pop_Head(Queue * Q, infotype * X){
 	DeleteFirst(Q, X);
 }
 

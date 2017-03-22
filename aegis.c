@@ -5,19 +5,29 @@
 /* Topik : DFS dan BFS */
 /* Kelompok 34 - Aegis */
 /* Anggota :
- * Gisela Supardi - 13515
+ * Gisela Supardi - 13515009
  * Erick Wijaya   - 13515057
- * Audry Nyonata  - 13515
+ * Audry Nyonata  - 13515087
  */
 
+#include "list/queue/queue.h"
+#include "list/queue/queue.c"
 #include "list/stack/stack.h"
+#include "list/stack/stack.c"
+#include "list/list.c"
 
 /* Aksi Bergerak */
 void MoveForward();
 void MoveForwardTimed(int t);
+void MoveBackward();
+void MoveBackwardTimed(int t);
+void FollowBlackLine();
 void Turn(int dir);
-/* Membelokkan robot sesuai arah (dir) */
-/* dir = 1 -> left, else -> right */
+void TurnTimed(int dir, int t);
+void CheckPath(bool *l, bool *m, bool *r);
+void BackToStart(Stack * S);
+void DFS(Stack * S);
+void BFS(Queue * Q);
 
 /* Predikat Warna */
 int IsWhite(); // TODO : Implement with RGB Value
@@ -27,20 +37,7 @@ int IsGreen();
 int IsRed();
 int IsYellow();
 
-task main()
-{
-	while(IsWhite())
-		MoveForward();
-	while(IsBlue())
-		MoveForward();
-	while(IsBlack())
-		MoveForward();
-	MoveForwardTimed(300);
-	Turn(1);
-	Turn(2);
-	Turn(2);
-}
-
+/* Realisasi */
 void MoveForward(){
 	setMotorSpeed(leftMotor, 50);
 	setMotorSpeed(rightMotor, 50);
@@ -52,18 +49,71 @@ void MoveForwardTimed(int t){
 	sleep(t);
 }
 
+void MoveBackward(){
+	setMotorSpeed(leftMotor, -50);
+	setMotorSpeed(rightMotor, -50);
+}
+
+void MoveBackwardTimed(int t){
+	setMotorSpeed(leftMotor, -30);
+	setMotorSpeed(rightMotor, -30);
+	sleep(t);
+}
+
+void FollowBlackLine(){
+  if(IsWhite()){
+    // counter-steer right:
+    motor[leftMotor]  = 15;
+    motor[rightMotor] = 55;
+  }
+  // sensor sees dark:
+  else{
+    // counter-steer left:
+    motor[leftMotor]  = 55;
+    motor[rightMotor] = 15;
+  }
+}
+
 void Turn(int dir){
+	int speed = 30;
+
 	resetGyro(gyroSensor);
 	if (dir == 1){
-		setMotorSpeed(leftMotor, -16);
-		setMotorSpeed(rightMotor, 16);
+		setMotorSpeed(leftMotor, -speed);
+		setMotorSpeed(rightMotor, speed);
 		repeatUntil(getGyroDegrees(gyroSensor) <= -89){}
 	}
-	else{
-		setMotorSpeed(leftMotor, 16);
-		setMotorSpeed(rightMotor, -16);
+	else if (dir == 2){
+		setMotorSpeed(leftMotor, speed);
+		setMotorSpeed(rightMotor, -speed);
 		repeatUntil(getGyroDegrees(gyroSensor) >= 89){}
 	}
+	else{
+		setMotorSpeed(leftMotor, speed);
+		setMotorSpeed(rightMotor, -speed);
+		repeatUntil(getGyroDegrees(gyroSensor) >= 179){}
+	}
+	setMotorSpeed(leftMotor, 0);
+	setMotorSpeed(rightMotor, 0);
+}
+
+void TurnTimed(int dir, int t){
+	int speed = 30;
+
+	resetGyro(gyroSensor);
+	if (dir == 1){
+		setMotorSpeed(leftMotor, -speed);
+		setMotorSpeed(rightMotor, speed);
+	}
+	else if (dir == 2){
+		setMotorSpeed(leftMotor, speed);
+		setMotorSpeed(rightMotor, -speed);
+	}
+	else{
+		setMotorSpeed(leftMotor, speed);
+		setMotorSpeed(rightMotor, -speed);
+	}
+	sleep(t);
 	setMotorSpeed(leftMotor, 0);
 	setMotorSpeed(rightMotor, 0);
 }
@@ -102,4 +152,209 @@ int IsYellow(){
 	if (getColorName(colorSensor) == colorYellow)
 		return 1;
 	return 0;
+}
+
+void CheckPath(bool *l, bool *m, bool *r){
+	// check left
+	MoveForwardTimed(700);
+	Turn(1);
+	if (IsBlack())
+		*l = true;
+	Turn(2);
+	// check mid
+	MoveForwardTimed(1000);
+	TurnTimed(1, 300);
+	if (IsBlack())
+		*m = true;
+	TurnTimed(3, 300);
+	// check right
+	MoveBackwardTimed(300);
+	Turn(2);
+	MoveForwardTimed(500);
+	if (IsBlack())
+		*r = true;
+	MoveBackwardTimed(500);
+	Turn(1);
+	// back to original position
+	MoveBackwardTimed(700);
+}
+
+void BackToStart(Stack * S){
+	int top;
+
+	while (!IsBlue()){
+		FollowBlackLine();
+		if (!IsBlack() && IsGreen()){
+			MoveForwardTimed(700);
+			Pop(S, &top);
+			if (top == 1)
+				Turn(3);
+			else if (top == 3)
+				Turn(1);
+			MoveForwardTimed(700);
+		}
+	}
+}
+
+void DFS(Stack * S){
+	int r, g, b;
+	int i;
+	int lv = -1;
+	bool v_left[MAX]; // visited array
+	bool v_right[MAX]; // visited array
+	bool v_mid[MAX]; // visited array
+	bool dead_end = false;
+	int top;
+
+	for(i=0; i<MAX; i++){
+		v_left[i] = false;
+		v_right[i] = false;
+		v_mid[i] = false;
+	}
+
+	while(!IsYellow() && !IsBlue()){
+
+		FollowBlackLine();
+		eraseDisplay();
+
+		getColorRGB(colorSensor, r, g, b);
+		displayCenteredTextLine(8, "%d %d %d", r, g, b);
+
+		if (!IsBlack()){
+			if (IsGreen()){
+
+				if (!dead_end){
+					++lv;
+					displayCenteredTextLine(5, "LV = %d", lv);
+
+					CheckPath(&v_left[lv], &v_mid[lv], &v_right[lv]);
+
+					displayCenteredTextLine(7, "%d %d %d", v_left[lv], v_mid[lv], v_right[lv]);
+					if (v_left[lv]){
+						Turn(1);
+						v_left[lv] = false;
+						Push(S, 1);
+					}else if (v_mid[lv]){
+						MoveForwardTimed(800);
+						v_mid[lv] = false;
+						Push(S, 2);
+					}else{
+						Turn(2);
+						v_right[lv] = false;
+						Push(S, 3);
+					}
+
+				}
+
+				else{
+					dead_end = false;
+					Pop(S, &top);
+					displayCenteredTextLine(5, "Top : %d", top);
+					MoveForwardTimed(800);
+
+					if (top == 1){
+						if (v_mid[lv]){
+							Turn(1);
+							v_mid[lv] = false;
+							Push(S, 2);
+						}else if (v_right[lv]){
+							MoveForwardTimed(800);
+							v_right[lv] = false;
+							Push(S, 3);
+						}else{
+							Turn(2); // backtrack
+							--lv;
+							dead_end = true;
+						}
+					}
+					else if (top == 2){
+						if (v_right[lv]){
+							Turn(1);
+							v_right[lv] = false;
+							Push(S, 3);
+						}else{
+							MoveForwardTimed(800); // backtrack
+							--lv;
+							dead_end = true;
+						}
+					}
+					else{ // top == 3;
+						Turn(1); // backtrack
+						--lv;
+						dead_end = true;
+					}
+
+				}
+
+
+			}
+			else if (IsRed()){
+				displayCenteredTextLine(2, "Dead End");
+				Turn(3);
+				dead_end = true;
+			}
+		}
+
+
+	}
+}
+
+void BFS(Queue * Q){
+	while (!IsGreen() && !IsYellow())
+		FollowBlackLine(); // go to first node or fire
+
+	int node = -1;
+	Queue Qn;
+	CreateQueue(&Qn);
+
+	while(!IsYellow() && !IsBlue()){
+		FollowBlackLine();
+		eraseDisplay();
+
+		getColorRGB(colorSensor, r, g, b);
+		displayCenteredTextLine(8, "%d %d %d", r, g, b);
+
+		if (!IsBlack()){
+			if (IsGreen()){
+				++node;
+				bool l, m, r;
+				CheckPath(&l, &m, &r);
+				if (l)
+					Push_Back(Q, 1);
+				if (m)
+					Push_Back(Q, 2);
+				if (r)
+					Push_Back(Q, 3);
+
+
+			}
+		}
+	}
+
+}
+
+/* Main Program Here*/
+task main()
+{
+	Stack S;
+	CreateStack(&S);
+	Queue Q;
+	CreateQueue(&Q);
+
+	while (!IsBlack())
+		MoveForward();
+	MoveForwardTimed(200);
+
+	/*DFS(&S);
+
+	if (IsYellow())
+		BackToStart(&S);
+	else{
+		eraseDisplay();
+		displayCenteredBigTextLine(3, "Fire Not Found");
+	}*/
+
+	BFS(&Q);
+
+
 }
