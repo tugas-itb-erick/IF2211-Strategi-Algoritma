@@ -2,18 +2,17 @@
 
 #pragma once
 
-#include <stdbool.h>
 #include "../list.h"
 
 /* Representasi Stack dengan List */
 typedef List Stack;
 
 /* Selektor */
-#define Top(S) (S).First
-#define InfoTop(S) (S).First->info
+#define Top(S) (S).last
+#define InfoTop(S) (S).info[last]
 
 /* ********* PROTOTYPE REPRESENTASI LOJIK STACK ***************/
-bool IsStackEmpty (Stack S);
+int IsStackEmpty (Stack * S);
 /* Mengirim true jika Stack kosong: TOP(S) = Nil */
 void CreateStack (Stack * S);
 /* I.S. sembarang */
@@ -30,5 +29,5 @@ void Pop (Stack * S, infotype * X);
 /* F.S. X adalah nilai elemen TOP yang lama, */
 /*      elemen TOP yang lama didealokasi */
 /* Pada dasarnya adalah operasi Delete First pada list linier */
-void PrintStack(Stack S);
+void PrintStack(Stack * S);
 /* Mencetak seluruh isi Stack S dari Top */

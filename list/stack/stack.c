@@ -1,12 +1,11 @@
 /* File : stack.c */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include "stack.h"
 
-bool IsStackEmpty (Stack S){
-	return (IsListEmpty(S));
+int IsStackEmpty (Stack * S){
+	if (IsListEmpty(S))
+		return 1;
+	return 0;
 }
 
 void CreateStack (Stack * S){
@@ -14,13 +13,13 @@ void CreateStack (Stack * S){
 }
 
 void Push (Stack * S, infotype X){
-	InsertFirst(S, X);
+	InsertLast(S, X);
 }
 
 void Pop (Stack * S, infotype * X){
-	DeleteFirst(S, X);
+	DeleteLast(S, X);
 }
 
-void PrintStack(Stack S){
-	PrintForward(S);
+void PrintStack(Stack * S){
+	PrintBackward(S);
 }

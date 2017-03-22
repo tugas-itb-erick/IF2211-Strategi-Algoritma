@@ -1,189 +1,81 @@
 /* File : list.c */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include "list.h"
 
-void InsFirst (List *L, address P);
-/* I.S. Sembarang, P sudah dialokasi  */
-/* F.S. Menambahkan elemen ber-address P sebagai elemen pertama */
-void InsLast (List *L, address P);
-/* I.S. Sembarang, P sudah dialokasi  */
-/* F.S. P ditambahkan sebagai elemen terakhir yang baru */
-void DelFirst (List *L, address *P);
-/* I.S. List tidak kosong */
-/* F.S. P adalah alamat elemen pertama list sebelum penghapusan */
-/*      Elemen list berkurang satu (mungkin menjadi kosong) */
-/* First element yg baru adalah suksesor elemen pertama yang lama */
-void DelLast (List *L, address *P);
-/* I.S. List tidak kosong */
-/* F.S. P adalah alamat elemen terakhir list sebelum penghapusan  */
-/*      Elemen list berkurang satu (mungkin menjadi kosong) */
-/* Last element baru adalah predesesor elemen pertama yg lama, jika ada */
-
-bool IsListEmpty (List L)
+int IsListEmpty (List *L)
 { // Kamus Lokal
 	// Algoritma
-	return ((First(L) == Nil) && (Last(L) == Nil));
+	if (Last(*L) == -1)
+		return 1;
+	return 0;
 }
 
 void CreateList (List *L)
 { // Kamus Lokal
+	int i;
 	// Algoritma
-	First(*L) = Nil;
-	Last(*L) = Nil;
-}
-
-address Alokasi (infotype X)
-{ // Kamus Lokal
-	address P;
-	// Algoritma
-	P = (address) malloc (sizeof(ElmtList));
-	if (P != Nil){
-		Info(P) = X;
-		Next(P) = Nil;
-		Prev(P) = Nil;
-	}
-	return P;
-}
-
-void Dealokasi (address P)
-{ // Kamus Lokal
-	// Algoritma
-	free(P);
-}
-
-address Search (List L, infotype X)
-{ // Kamus Lokal
-	address P;
-	bool found;
-	// Algoritma
-	P = First(L);
-	found = false;
-	while ((P != Nil) && !(found)){
-		if (Info(P) == X)
-			found = true;
-		else
-			P = Next(P);
-	}
-	return P;
+	First(*L) = 0;
+	Last(*L) = -1;
 }
 
 void InsertFirst (List *L, infotype X)
 { // Kamus Lokal
-	address P;
+	int i;
 	// Algoritma
-	P = Alokasi(X);
-	if (P != Nil)
-		InsFirst(L, P);
+	++Last(*L);
+	for(i=Last(*L); i>0; i--)
+		Info(*L,i) = Info(*L,i-1);
+	Info(*L, First(*L)) = X;
 }
 
 void InsertLast (List *L, infotype X)
 { // Kamus Lokal
-	address P;
+	int i;
 	// Algoritma
-	P = Alokasi(X);
-	if (P != Nil)
-		InsLast(L, P);
+	++Last(*L);
+	Info(*L, Last(*L)) = X;
 }
 
 void DeleteFirst (List *L, infotype *X)
 { // Kamus Lokal
-	address P;
+	int i;
 	// Algoritma
-	DelFirst(L, &P);
-	*X = Info(P);
-	Dealokasi(P);
+	*X = Info(*L, First(*L));
+	for(i=0; i<Last(*L); i++)
+		Info(*L,i) = Info(*L,i+1);
+	--Last(*L);
 }
 
 void DeleteLast (List *L, infotype *X)
 { // Kamus Lokal
-	address P;
+	int i;
 	// Algoritma
-	DelLast(L, &P);
-	*X = Info(P);
-	Dealokasi(P);
+	*X = Info(*L, Last(*L));
+	--Last(*L);
 }
 
-void PrintForward (List L)
+void PrintForward (List *L)
 { // Kamus Lokal
-	address P;
+	int i;
 	// Algoritma
-	printf("[");
-	P = First(L);
-	while (P != Nil){
-		printf("%d", Info(P));
-		if (Next(P) != Nil)
+	/*printf("[");
+	for(i=0; i<=Last(*L); i++){
+		printf("%d", Info(*L, i));
+		if (i < Last(*L))
 			printf(",");
-		P = Next(P);
 	}
-	printf("]");
+	printf("]");*/
 }
 
-void PrintBackward (List L)
+void PrintBackward (List *L)
 { // Kamus Lokal
-	address P;
+	int i;
 	// Algoritma
-	printf("[");
-	P = Last(L);
-	while (P != Nil){
-		printf("%d", Info(P));
-		if (Prev(P) != Nil)
+	/*printf("[");
+	for(i=Last(*L); i>=0; i--){
+		printf("%d", Info(*L, i));
+		if (i > 0)
 			printf(",");
-		P = Prev(P);
 	}
-	printf("]");
-}
-
-void InsFirst (List *L, address P)
-{ // Kamus Lokal
-  // Algoritma
-  Next(P) = First(*L);
-  if (IsListEmpty(*L)){
-    Last(*L) = P;
-  }else{
-    Prev(First(*L)) = P;
-  }
-  First(*L) = P;
-}
-
-void InsLast (List *L, address P)
-{ // Kamus Lokal
-  // Algoritma
-  Prev(P) = Last(*L);
-  if (IsListEmpty(*L)){
-    First(*L) = P;
-  }else{
-    Next(Last(*L)) = P;
-  }
-  Last(*L) = P;
-}
-
-void DelFirst (List *L, address *P)
-{ // Kamus Lokal
-  // Algoritma
-  *P = First(*L);
-  if (First(*L) == Last(*L)){ // IsOneElmt, tidak mungkin First dan Last bernilai Nil
-    Last(*L) = Nil;
-  }else{
-    Prev(Next(*P)) = Nil;
-  }
-  First(*L) = Next(*P);
-  Next(*P) = Nil;
-  Prev(*P) = Nil;
-}
-
-void DelLast (List *L, address *P)
-{ // Kamus Lokal
-  // Algoritma
-  *P = Last(*L);
-  if (First(*L) == Last(*L)){ // IsOneElmt, tidak mungkin First dan Last bernilai Nil
-    First(*L) = Nil;
-  }else{
-    Next(Prev(*P)) = Nil;
-  }
-  Last(*L) = Prev(*P);
-  Prev(*P) = Nil;
-  Next(*P) = Nil;
+	printf("]");*/
 }

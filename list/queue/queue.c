@@ -1,12 +1,11 @@
 /* File : queue.c */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include "queue.h"
 
-bool IsQueueEmpty (Queue Q){
-	return (IsListEmpty(Q));
+int IsQueueEmpty (Queue * Q){
+	if (IsListEmpty(Q))
+		return 1;
+	return 0;
 }
 
 void CreateQueue(Queue * Q){
@@ -21,6 +20,6 @@ void Del(Queue * Q, infotype * X){
 	DeleteFirst(Q, X);
 }
 
-void PrintQueue(Queue Q){
+void PrintQueue(Queue * Q){
 	PrintForward(Q);
 }

@@ -1,8 +1,6 @@
 /* File : mlist.c */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include "list.h"
 #include "stack/stack.h"
 #include "queue/queue.h"
@@ -19,16 +17,16 @@ int main(){
   for(i=0; i<10; i++){
     InsertFirst(&L1, i);
   }
-  PrintForward(L1); printf("\n");
-  PrintBackward(L1); printf("\n");
+  PrintForward(&L1); printf("\n");
+  PrintBackward(&L1); printf("\n");
 
   printf("Test Delete\n");
   for(i=0; i<2; i++){
     DeleteFirst(&L1, &dum);
     DeleteLast(&L1, &dum);
   }
-  PrintForward(L1); printf("\n");
-  PrintBackward(L1); printf("\n\n");
+  PrintForward(&L1); printf("\n");
+  PrintBackward(&L1); printf("\n\n");
 
   printf("STACK DRIVER\n");
   Stack S;
@@ -38,13 +36,13 @@ int main(){
   for(i=0; i<10; i++){
     Push(&S, i);
   }
-  PrintStack(S); printf("\n");
+  PrintStack(&S); printf("\n");
 
   printf("Test Pop\n");
   for(i=0; i<2; i++){
     Pop(&S, &dum);
   }
-  PrintStack(S); printf("\n\n");
+  PrintStack(&S); printf("\n\n");
 
   printf("QUEUE DRIVER\n");
   Queue Q;
@@ -54,17 +52,17 @@ int main(){
   for(i=0; i<10; i++){
     Add(&Q, i);
   }
-  PrintQueue(Q); printf("\n");
+  PrintQueue(&Q); printf("\n");
 
   printf("Test Del\n");
   for(i=0; i<2; i++){
     Del(&Q, &dum);
   }
-  PrintQueue(Q); printf("\n");
+  PrintQueue(&Q); printf("\n");
 
   printf("Test Add\n");
   Add(&Q, 12);
-  PrintQueue(Q); printf("\n\n");
+  PrintQueue(&Q); printf("\n\n");
 
   return 0;
 }

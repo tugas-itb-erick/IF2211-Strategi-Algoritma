@@ -2,20 +2,19 @@
 
 #pragma once
 
-#include <stdbool.h>
 #include "../list.h"
 
 /* Representasi Queue dengan List */
 typedef List Queue;
 
 /* Selektor */
-#define Head(Q) (Q).First
-#define Tail(Q) (Q).Last
-#define InfoHead(Q) (Q).First->Info
-#define InfoTail(Q) (Q).Last->Info
+#define Head(Q) (Q).first
+#define Tail(Q) (Q).last
+#define InfoHead(Q) (Q).info[first]
+#define InfoTail(Q) (Q).info[last]
 
 /* ********* PROTOTYPE REPRESENTASI LOJIK QUEUE ***************/
-bool IsQueueEmpty(Queue Q);
+int IsQueueEmpty(Queue * Q);
 /* Mengirim true jika Q kosong: HEAD(Q)=Nil and TAIL(Q)=Nil */
 void CreateQueue(Queue * Q);
 /* I.S. sembarang */
@@ -32,5 +31,5 @@ void Del(Queue * Q, infotype * X);
 /* Pada dasarnya operasi delete first */
 /* I.S. Q tidak mungkin kosong */
 /* F.S. X = nilai elemen HEAD pd I.S., HEAD "mundur" */
-void PrintQueue(Queue S);
+void PrintQueue(Queue * Q);
 /* Mencetak seluruh isi Queue Q dari HEAD hingga TAIL */
