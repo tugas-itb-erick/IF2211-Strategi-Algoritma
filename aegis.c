@@ -300,10 +300,9 @@ void DFS(Stack * S){
 }
 
 void BFS(Queue * Q){
-	while (!IsGreen() && !IsYellow())
-		FollowBlackLine(); // go to first node or fire
-
 	int node = -1;
+	int head;
+	int r, g, b;
 	Queue Qn;
 	CreateQueue(&Qn);
 
@@ -317,7 +316,9 @@ void BFS(Queue * Q){
 		if (!IsBlack()){
 			if (IsGreen()){
 				++node;
+				Push_Back(&Qn, node);
 				bool l, m, r;
+
 				CheckPath(&l, &m, &r);
 				if (l)
 					Push_Back(Q, 1);
@@ -326,7 +327,12 @@ void BFS(Queue * Q){
 				if (r)
 					Push_Back(Q, 3);
 
+				Pop_Head(Q, &head);
 
+			}
+
+			else if (IsRed()){
+				Turn(3);
 			}
 		}
 	}
@@ -343,7 +349,7 @@ task main()
 
 	while (!IsBlack())
 		MoveForward();
-	MoveForwardTimed(200);
+	MoveForwardTimed(500);
 
 	/*DFS(&S);
 
