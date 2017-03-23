@@ -30,12 +30,12 @@ void DFS(Stack * S);
 void BFS(Queue * Q);
 
 /* Predikat Warna */
-int IsWhite(); // TODO : Implement with RGB Value
-int IsBlack();
-int IsBlue();
-int IsGreen();
-int IsRed();
-int IsYellow();
+bool IsWhite();
+bool IsBlack();
+bool IsBlue();
+bool IsGreen();
+bool IsRed();
+bool IsYellow();
 
 /* Realisasi */
 void MoveForward(){
@@ -118,40 +118,28 @@ void TurnTimed(int dir, int t){
 	setMotorSpeed(rightMotor, 0);
 }
 
-int IsWhite(){
-	if (getColorName(colorSensor) == colorWhite)
-		return 1;
-	return 0;
+bool IsWhite(){
+	return (getColorName(colorSensor) == colorWhite);
 }
 
-int IsBlack(){
-	if (getColorName(colorSensor) == colorBlack)
-		return 1;
-	return 0;
+bool IsBlack(){
+	return (getColorName(colorSensor) == colorBlack);
 }
 
-int IsBlue(){
-	if (getColorName(colorSensor) == colorBlue)
-		return 1;
-	return 0;
+bool IsBlue(){
+	return (getColorName(colorSensor) == colorBlue);
 }
 
-int IsGreen(){
-	if (getColorName(colorSensor) == colorGreen)
-		return 1;
-	return 0;
+bool IsGreen(){
+	return (getColorName(colorSensor) == colorGreen);
 }
 
-int IsRed(){
-	if (getColorName(colorSensor) == colorRed)
-		return 1;
-	return 0;
+bool IsRed(){
+	return (getColorName(colorSensor) == colorRed);
 }
 
-int IsYellow(){
-	if (getColorName(colorSensor) == colorYellow)
-		return 1;
-	return 0;
+bool IsYellow(){
+	return (getColorName(colorSensor) == colorYellow);
 }
 
 void CheckPath(bool *l, bool *m, bool *r){
@@ -182,16 +170,24 @@ void CheckPath(bool *l, bool *m, bool *r){
 void BackToStart(Stack * S){
 	int top;
 
-	while (!IsBlue()){
+	while (true){
 		FollowBlackLine();
-		if (!IsBlack() && IsGreen()){
-			MoveForwardTimed(700);
-			Pop(S, &top);
-			if (top == 1)
-				Turn(3);
-			else if (top == 3)
-				Turn(1);
-			MoveForwardTimed(700);
+		if (!IsBlack()){
+			if (IsBlue() && !IsBlack()){
+				break;
+			}
+
+			else if (IsGreen()){
+				MoveForwardTimed(700);
+				if (!IsStackEmpty(S)){
+					Pop(S, &top);
+					if (top == 1)
+						Turn(3);
+					else if (top == 3)
+						Turn(1);
+					MoveForwardTimed(700);
+				}
+			}
 		}
 	}
 }
@@ -212,24 +208,29 @@ void DFS(Stack * S){
 		v_mid[i] = false;
 	}
 
-	while(!IsYellow() && !IsBlue()){
+	while(true){
+
+		displayCenteredTextLine(1, "Aegis The Maze Solver");
+		getColorRGB(colorSensor, r, g, b);
+		displayString(3, "Color: %d  %d  %d   ", r, g, b);
+		if (lv >= 0)
+			displayString(4, "Level: %d", lv);
+		else
+			displayString(4, "         ", lv);
 
 		FollowBlackLine();
-		eraseDisplay();
-
-		getColorRGB(colorSensor, r, g, b);
-		displayCenteredTextLine(8, "%d %d %d", r, g, b);
 
 		if (!IsBlack()){
 			if (IsGreen()){
 
 				if (!dead_end){
 					++lv;
-					displayCenteredTextLine(5, "LV = %d", lv);
+					displayString(4, "Level: %d", lv);
 
 					CheckPath(&v_left[lv], &v_mid[lv], &v_right[lv]);
 
-					displayCenteredTextLine(7, "%d %d %d", v_left[lv], v_mid[lv], v_right[lv]);
+					displayString(6, "Path Found: %d %d %d", v_left[lv], v_mid[lv], v_right[lv]);
+
 					if (v_left[lv]){
 						Turn(1);
 						v_left[lv] = false;
@@ -249,7 +250,7 @@ void DFS(Stack * S){
 				else{
 					dead_end = false;
 					Pop(S, &top);
-					displayCenteredTextLine(5, "Top : %d", top);
+					// displayCenteredTextLine(5, "Top : %d", top);
 					MoveForwardTimed(800);
 
 					if (top == 1){
@@ -289,14 +290,29 @@ void DFS(Stack * S){
 
 			}
 			else if (IsRed()){
-				displayCenteredTextLine(2, "Dead End");
+				displayCenteredTextLine(8, "Dead End");
 				Turn(3);
+				displayCenteredTextLine(8, "        ");
 				dead_end = true;
 			}
+
+			else if ((IsBlue() || IsYellow()) && !IsBlack()){
+				break;
+			}
+
 		}
 
-
 	}
+
+	if (IsYellow()){
+		displayCenteredBigTextLine(3, "Extinguishing Fire");
+		Turn(3); Turn(3); Turn(3);
+		BackToStart(S);
+	}
+	else if (IsBlue()){
+		displayCenteredBigTextLine(3, "Fire Not Found");
+	}
+
 }
 
 void BFS(Queue * Q){
@@ -306,7 +322,7 @@ void BFS(Queue * Q){
 	Queue Qn;
 	CreateQueue(&Qn);
 
-	while(!IsYellow() && !IsBlue()){
+	while(true){
 		FollowBlackLine();
 		eraseDisplay();
 
@@ -334,6 +350,10 @@ void BFS(Queue * Q){
 			else if (IsRed()){
 				Turn(3);
 			}
+
+			else if ((IsBlue() || IsYellow()) && !IsBlack()){
+				break;
+			}
 		}
 	}
 
@@ -347,20 +367,27 @@ task main()
 	Queue Q;
 	CreateQueue(&Q);
 
+	displayCenteredTextLine(1, "Aegis The Maze Solver");
+
 	while (!IsBlack())
 		MoveForward();
 	MoveForwardTimed(500);
 
-	/*DFS(&S);
+	DFS(&S);
 
-	if (IsYellow())
-		BackToStart(&S);
-	else{
-		eraseDisplay();
-		displayCenteredBigTextLine(3, "Fire Not Found");
-	}*/
+	if (IsBlack()){
+		displayCenteredBigTextLine(3, "BlackFound");
+	}
+	else if (getColorName(colorSensor) == colorBrown){
+		displayCenteredBigTextLine(3, "Brown");
+	}else if (getColorName(colorSensor) == colorNone){
+		displayCenteredBigTextLine(3, "Cony");
+	}else{
+		displayCenteredBigTextLine(3, "Else");
+	}
 
+/*
 	BFS(&Q);
-
+*/
 
 }
