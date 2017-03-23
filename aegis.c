@@ -26,8 +26,8 @@ void Turn(int dir);
 void TurnTimed(int dir, int t);
 void CheckPath(bool *l, bool *m, bool *r);
 void BackToStart(Stack * S);
-void DFS(Stack * S);
-void BFS(Queue * Q);
+void DFS();
+void BFS();
 
 /* Predikat Warna */
 bool IsWhite();
@@ -151,10 +151,10 @@ void CheckPath(bool *l, bool *m, bool *r){
 	Turn(2);
 	// check mid
 	MoveForwardTimed(1000);
-	TurnTimed(1, 300);
+	TurnTimed(1, 250);
 	if (IsBlack())
 		*m = true;
-	TurnTimed(3, 300);
+	TurnTimed(3, 250);
 	// check right
 	MoveBackwardTimed(300);
 	Turn(2);
@@ -190,11 +190,9 @@ void BackToStart(Stack * S){
 			}
 		}
 	}
-	eraseDisplay();
-	displayCenteredBigTextLine(2, "DFS Clear");
 }
 
-void DFS(Stack * S){
+void DFS(){
 	int r, g, b;
 	int i;
 	int lv = -1;
@@ -203,6 +201,9 @@ void DFS(Stack * S){
 	bool v_mid[MAX]; // visited array
 	bool dead_end = false;
 	int top;
+
+	Stack S;
+	CreateStack(&S);
 
 	for(i=0; i<MAX; i++){
 		v_left[i] = false;
@@ -236,26 +237,26 @@ void DFS(Stack * S){
 					if (v_left[lv]){
 						Turn(1);
 						v_left[lv] = false;
-						Push(S, 1);
+						Push(&S, 1);
 					}else if (v_mid[lv]){
 						MoveForwardTimed(800);
 						v_mid[lv] = false;
-						Push(S, 2);
+						Push(&S, 2);
 					}else{
 						Turn(2);
 						v_right[lv] = false;
-						Push(S, 3);
+						Push(&S, 3);
 					}
 
 					for(i = 0; i <= lv; i++){
-						displayString(5+i, "(%d) Branching to %d", i, Info(*S, i));
+						displayString(5+i, "(%d) Branching to %d", i, Info(S, i));
 					}
 
 				}
 
 				else{
 					dead_end = false;
-					Pop(S, &top);
+					Pop(&S, &top);
 					// displayCenteredTextLine(5, "Top : %d", top);
 					MoveForwardTimed(800);
 
@@ -263,11 +264,11 @@ void DFS(Stack * S){
 						if (v_mid[lv]){
 							Turn(1);
 							v_mid[lv] = false;
-							Push(S, 2);
+							Push(&S, 2);
 						}else if (v_right[lv]){
 							MoveForwardTimed(800);
 							v_right[lv] = false;
-							Push(S, 3);
+							Push(&S, 3);
 						}else{
 							Turn(2); // backtrack
 							--lv;
@@ -278,7 +279,7 @@ void DFS(Stack * S){
 						if (v_right[lv]){
 							Turn(1);
 							v_right[lv] = false;
-							Push(S, 3);
+							Push(&S, 3);
 						}else{
 							MoveForwardTimed(800); // backtrack
 							--lv;
@@ -292,7 +293,7 @@ void DFS(Stack * S){
 					}
 
 					for(i = 0; i <= lv; i++){
-						displayString(5+i, "(%d) Branching to %d", i, Info(*S, i));
+						displayString(5+i, "(%d) Branching to %d", i, Info(S, i));
 					}
 
 					if (dead_end){
@@ -324,56 +325,238 @@ void DFS(Stack * S){
 		displayCenteredTextLine(3, "                     ");
 		displayString(4, "Solution:   ");
 		displayCenteredTextLine(3, "Back To Start");
-		BackToStart(S);
+		BackToStart(&S);
+		eraseDisplay();
+		displayCenteredBigTextLine(2, "DFS Clear");
 	}
 	else if (IsBlue()){
+		eraseDisplay();
 		displayCenteredBigTextLine(3, "Fire Not Found");
 	}
 
+
 }
 
-void BFS(Queue * Q){
-	int node = -1;
-	int head;
+List L[10];
+
+void BFS(){
 	int r, g, b;
-	bool dead_end = false;
-	Queue Qn;
-	CreateQueue(&Qn);
+	int i;
+	int lv;
+	int max_lv;
+	bool v_left[MAX]; // visited array
+	bool v_right[MAX]; // visited array
+	bool v_mid[MAX]; // visited array
+	bool dead_end;
+	bool solution = false;
+	int top;
+	Stack S;
+	CreateStack(&S);
 
-	while(true){
-		FollowBlackLine();
-		eraseDisplay();
+	for(i=0; i<MAX; i++){
+		v_left[i] = false;
+		v_right[i] = false;
+		v_mid[i] = false;
+	}
 
-		getColorRGB(colorSensor, r, g, b);
-		displayCenteredTextLine(8, "%d %d %d", r, g, b);
+	int idx[10];
+	for(i=0; i<10; i++)
+		CreateList(&L[i]);
 
-		if (!IsBlack()){
-			if (IsGreen()){
-				++node;
-				Push_Back(&Qn, node);
-				bool l, m, r;
+	for(max_lv = 1; max_lv < 10; ++max_lv){
 
-				CheckPath(&l, &m, &r);
-				if (l)
-					Push_Back(Q, 1);
-				if (m)
-					Push_Back(Q, 2);
-				if (r)
-					Push_Back(Q, 3);
+		if (solution)
+			break;
 
-				Pop_Head(Q, &head);
+		for(i=0; i<10; i++)
+			idx[i] = -1;
+
+		lv = -1;
+		dead_end = false;
+
+		// displayCenteredBigTextLine(5, "%d", max_lv);
+
+		while(true){
+
+			displayCenteredTextLine(1, "Aegis The Maze Solver");
+			getColorRGB(colorSensor, r, g, b);
+			displayString(3, "Color: %d  %d  %d   ", r, g, b);
+			if (lv >= 0)
+				displayString(4, "Level: %d", lv);
+			else
+				displayString(4, "         ", lv);
+
+			FollowBlackLine();
+
+			if (!IsBlack()){
+				if (IsGreen()){
+
+					if (!dead_end){
+						++lv;
+						displayString(4, "Level: %d", lv);
+
+						if (lv < max_lv){
+
+							CheckPath(&v_left[lv], &v_mid[lv], &v_right[lv]);
+
+							// displayString(5, "Path Found: %d %d %d", v_left[lv], v_mid[lv], v_right[lv]);
+
+							++idx[lv];
+							if (lv == max_lv-1){
+								if (v_left[lv]){
+									Turn(1);
+									v_left[lv] = false;
+									Push(&S, 1);
+								}else if (v_mid[lv]){
+									MoveForwardTimed(800);
+									v_mid[lv] = false;
+									Push(&S, 2);
+								}else {
+									Turn(2);
+									v_right[lv] = false;
+									Push(&S, 3);
+								}
+							}
+							else{
+								if (v_left[lv] && !L[idx[lv]]){
+									Turn(1);
+									v_left[lv] = false;
+									Push(&S, 1);
+								}else if (v_mid[lv] && !L[idx[lv]]){
+									MoveForwardTimed(800);
+									v_mid[lv] = false;
+									Push(&S, 2);
+								}else if (!L[idx[lv]]){
+									Turn(2);
+									v_right[lv] = false;
+									Push(&S, 3);
+								}
+								if (v_left[lv] && L[idx[lv]])
+									v_left[lv] = false;
+								if (v_mid[lv] && L[idx[lv]])
+									v_mid[lv] = false;
+								if (v_right[lv] && L[idx[lv]])
+									v_right[lv] = false;
+
+
+							}
+
+							for(i = 0; i <= lv; i++){
+								displayString(5+i, "(%d) Branching to %d", i, Info(S, i));
+							}
+						}
+
+						else{
+							displayCenteredTextLine(14, "Backtracking...");
+							Turn(3);
+							displayCenteredTextLine(14, "        ");
+							dead_end = true;
+							--lv;
+
+							InsertLast(&L[lv], 0);
+							// ++idx[lv];
+						}
+
+					}
+
+					else{
+						dead_end = false;
+						Pop(&S, &top);
+						// displayCenteredTextLine(5, "Top : %d", top);
+						MoveForwardTimed(800);
+
+						if (top == 1){
+							if (v_mid[lv]){
+								Turn(1);
+								v_mid[lv] = false;
+								Push(&S, 2);
+							}else if (v_right[lv]){
+								MoveForwardTimed(800);
+								v_right[lv] = false;
+								Push(&S, 3);
+							}else{
+								Turn(2); // backtrack
+								--lv;
+								dead_end = true;
+							}
+						}
+						else if (top == 2){
+							if (v_right[lv]){
+								Turn(1);
+								v_right[lv] = false;
+								Push(&S, 3);
+							}else{
+								MoveForwardTimed(800); // backtrack
+								--lv;
+								dead_end = true;
+							}
+						}
+						else{ // top == 3;
+							Turn(1); // backtrack
+							--lv;
+							dead_end = true;
+						}
+
+						for(i = 0; i <= lv; i++){
+							displayString(5+i, "(%d) Branching to %d", i, Info(S, i));
+						}
+
+						if (dead_end){
+							displayString(5+lv+1, "                     ");
+						}
+
+					}
+
+
+				}
+				else if (IsRed()){
+					displayCenteredTextLine(14, "Dead End");
+					Turn(3);
+					displayCenteredTextLine(14, "        ");
+					dead_end = true;
+
+					InsertLast(&L[lv], 1);
+					// ++idx[lv];
+				}
+
+				else if ((IsBlue() || IsYellow()) && !IsBlack()){
+					solution = true;
+					break;
+				}
 
 			}
 
-			else if (IsRed()){
+			if ((lv == -1) && (dead_end)){
+				TurnTimed(2, 200);
+				MoveForwardTimed(1500);
 				Turn(3);
-				dead_end = true;
-			}
-
-			else if ((IsBlue() || IsYellow()) && !IsBlack()){
+				TurnTimed(1, 100);
 				break;
 			}
+
 		}
+
+		if (solution)
+			break;
+
+	}
+
+	motor[leftMotor] = 0;
+	motor[rightMotor] = 0;
+
+	if (IsYellow()){
+		displayCenteredTextLine(3, "Extinguishing Fire");
+		Turn(3); Turn(3); Turn(3);
+		displayCenteredTextLine(3, "                     ");
+		displayString(4, "Solution:   ");
+		displayCenteredTextLine(3, "Back To Start");
+		BackToStart(&S);
+		eraseDisplay();
+		displayCenteredBigTextLine(2, "BFS Clear");
+	}
+	else if (IsBlue()){
+		eraseDisplay();
+		displayCenteredBigTextLine(3, "Fire Not Found");
 	}
 
 }
@@ -381,31 +564,21 @@ void BFS(Queue * Q){
 /* Main Program Here*/
 task main()
 {
-	Stack S;
-	CreateStack(&S);
-	Queue Q;
-	CreateQueue(&Q);
-
 	displayCenteredTextLine(1, "Aegis The Maze Solver");
 
 	while (!IsBlack())
 		MoveForward();
 	MoveForwardTimed(500);
 
-	DFS(&S);
+	DFS();
 
+	motor[leftMotor] = 0;
+	motor[rightMotor] = 0;
 	sleep(2000);
-
+	eraseDisplay();
 	displayCenteredTextLine(1, "Aegis The Maze Solver");
-	MoveForwardTimed(2000);
 	Turn(3);
 
-	while (!IsBlack())
-		MoveForward();
-	MoveForwardTimed(500);
-
-/*
-	BFS(&Q);
-*/
+	BFS();
 
 }
