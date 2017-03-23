@@ -182,7 +182,7 @@ void BackToStart(Stack * S){
 				if (!IsStackEmpty(S)){
 					Pop(S, &top);
 					if (top == 1)
-						Turn(3);
+						Turn(2);
 					else if (top == 3)
 						Turn(1);
 					MoveForwardTimed(700);
