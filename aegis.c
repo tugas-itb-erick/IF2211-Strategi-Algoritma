@@ -182,7 +182,7 @@ void BackToStart(Stack * S){
 				if (!IsStackEmpty(S)){
 					Pop(S, &top);
 					if (top == 1)
-						Turn(3);
+						Turn(2);
 					else if (top == 3)
 						Turn(1);
 					MoveForwardTimed(700);
@@ -190,6 +190,8 @@ void BackToStart(Stack * S){
 			}
 		}
 	}
+	eraseDisplay();
+	displayCenteredBigTextLine(2, "DFS Clear");
 }
 
 void DFS(Stack * S){
@@ -229,7 +231,7 @@ void DFS(Stack * S){
 
 					CheckPath(&v_left[lv], &v_mid[lv], &v_right[lv]);
 
-					displayString(6, "Path Found: %d %d %d", v_left[lv], v_mid[lv], v_right[lv]);
+					// displayString(5, "Path Found: %d %d %d", v_left[lv], v_mid[lv], v_right[lv]);
 
 					if (v_left[lv]){
 						Turn(1);
@@ -243,6 +245,10 @@ void DFS(Stack * S){
 						Turn(2);
 						v_right[lv] = false;
 						Push(S, 3);
+					}
+
+					for(i = 0; i <= lv; i++){
+						displayString(5+i, "(%d) Branching to %d", i, Info(*S, i));
 					}
 
 				}
@@ -285,14 +291,22 @@ void DFS(Stack * S){
 						dead_end = true;
 					}
 
+					for(i = 0; i <= lv; i++){
+						displayString(5+i, "(%d) Branching to %d", i, Info(*S, i));
+					}
+
+					if (dead_end){
+						displayString(5+lv+1, "                     ");
+					}
+
 				}
 
 
 			}
 			else if (IsRed()){
-				displayCenteredTextLine(8, "Dead End");
+				displayCenteredTextLine(14, "Dead End");
 				Turn(3);
-				displayCenteredTextLine(8, "        ");
+				displayCenteredTextLine(14, "        ");
 				dead_end = true;
 			}
 
@@ -305,8 +319,11 @@ void DFS(Stack * S){
 	}
 
 	if (IsYellow()){
-		displayCenteredBigTextLine(3, "Extinguishing Fire");
+		displayCenteredTextLine(3, "Extinguishing Fire");
 		Turn(3); Turn(3); Turn(3);
+		displayCenteredTextLine(3, "                     ");
+		displayString(4, "Solution:   ");
+		displayCenteredTextLine(3, "Back To Start");
 		BackToStart(S);
 	}
 	else if (IsBlue()){
@@ -319,6 +336,7 @@ void BFS(Queue * Q){
 	int node = -1;
 	int head;
 	int r, g, b;
+	bool dead_end = false;
 	Queue Qn;
 	CreateQueue(&Qn);
 
@@ -349,6 +367,7 @@ void BFS(Queue * Q){
 
 			else if (IsRed()){
 				Turn(3);
+				dead_end = true;
 			}
 
 			else if ((IsBlue() || IsYellow()) && !IsBlack()){
@@ -375,16 +394,15 @@ task main()
 
 	DFS(&S);
 
-	if (IsBlack()){
-		displayCenteredBigTextLine(3, "BlackFound");
-	}
-	else if (getColorName(colorSensor) == colorBrown){
-		displayCenteredBigTextLine(3, "Brown");
-	}else if (getColorName(colorSensor) == colorNone){
-		displayCenteredBigTextLine(3, "Cony");
-	}else{
-		displayCenteredBigTextLine(3, "Else");
-	}
+	sleep(2000);
+
+	displayCenteredTextLine(1, "Aegis The Maze Solver");
+	MoveForwardTimed(2000);
+	Turn(3);
+
+	while (!IsBlack())
+		MoveForward();
+	MoveForwardTimed(500);
 
 /*
 	BFS(&Q);
