@@ -16,20 +16,37 @@
 #include "list/stack/stack.c"
 #include "list/list.c"
 
-/* Aksi Bergerak */
+/* Motors Procedure */
 void MoveForward();
+// Simple moving forward procedure
 void MoveForwardTimed(int t);
+// Move forward in t milliseconds
 void MoveBackward();
+// Simple move backward procedure
 void MoveBackwardTimed(int t);
+// Move backward in t milliseconds
 void FollowBlackLine();
+// Follow black line
 void Turn(int dir);
+// Turn depends on dir (direction)
+// dir=1 -> turn left
+// dir=2 -> turn right
+// dir=3 -> turn behind
 void TurnTimed(int dir, int t);
+// Turn to dir direction in t milliseconds
 void CheckPath(bool *l, bool *m, bool *r);
+// initial state: robot is located on green tile
+// check if left, middle, and right has accesible path
+// output true if has accesible path
 void BackToStart(Stack * S);
+// initial state: stack is not empty
+// bring the robot back to blue tile from yellow tile
 void DFS();
+// depth-first search
 void BFS();
+// breath-first search
 
-/* Predikat Warna */
+/* Color Predicate */
 bool IsWhite();
 bool IsBlack();
 bool IsBlue();
@@ -37,7 +54,7 @@ bool IsGreen();
 bool IsRed();
 bool IsYellow();
 
-/* Realisasi */
+/* Body */
 void MoveForward(){
 	setMotorSpeed(leftMotor, 50);
 	setMotorSpeed(rightMotor, 50);
@@ -225,6 +242,7 @@ void DFS(){
 
 		if (!IsBlack()){
 			if (IsGreen()){
+				displayCenteredTextLine(14, "                   ");
 
 				if (!dead_end){
 					++lv;
@@ -298,6 +316,7 @@ void DFS(){
 
 					if (dead_end){
 						displayString(5+lv+1, "                     ");
+						displayCenteredTextLine(14, "Backtracking...");
 					}
 
 				}
@@ -307,7 +326,7 @@ void DFS(){
 			else if (IsRed()){
 				displayCenteredTextLine(14, "Dead End");
 				Turn(3);
-				displayCenteredTextLine(14, "        ");
+				displayCenteredTextLine(14, "                   ");
 				dead_end = true;
 			}
 
@@ -564,21 +583,28 @@ void BFS(){
 /* Main Program Here*/
 task main()
 {
+	// Display Robot Name
 	displayCenteredTextLine(1, "Aegis The Maze Solver");
 
+	// Initial Move
 	while (!IsBlack())
 		MoveForward();
 	MoveForwardTimed(500);
 
+	// Start DFS
 	DFS();
 
+	// Stop Robot for 2000ms
 	motor[leftMotor] = 0;
 	motor[rightMotor] = 0;
 	sleep(2000);
+
+	// Prepare Robot Position to do BFS
 	eraseDisplay();
 	displayCenteredTextLine(1, "Aegis The Maze Solver");
 	Turn(3);
 
+	// Start BFS
 	BFS();
 
 }
