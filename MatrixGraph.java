@@ -132,7 +132,7 @@ public class MatrixGraph {
 
 	public void tsp2() {
 		PriorityQueue<Pair<Integer, Vector<Integer>>> pq = new
-			PriorityQueue<Pair<Integer, Vector<Integer>>>();
+			PriorityQueue<Pair<Integer, Vector<Integer>>>(1, new MatrixGraphPairComparator());
 
 		// insert first node to pq
 		Vector<Integer> firstSolution = new Vector<Integer>(1);
@@ -143,10 +143,58 @@ public class MatrixGraph {
 		while (pq.peek().getSecond().size() < size){
 			Pair<Integer, Vector<Integer>> head = pq.poll();
 
-			for(int i=0; i<size; i++){
+			for(int j=0; j<size; j++){
+				boolean isExist = false;
+				for(int i=0; i<head.getSecond().size(); i++){
+					if (j == head.getSecond().get(i))
+						isExist = true;
+				}
 
+				if ((data[head.getSecond().lastElement()][j] != UNDEF) && !isExist){
+					Vector<Integer> solution = new Vector<Integer>(head.getSecond());
+
+					// add next node to solution
+					solution.add(j);
+
+					int completeTour = 0;
+					// loop to count completeTour value
+					for(int i=0; i<size; i++){
+						int ifound = 0;
+						while ((ifound < solution.size()) && (solution.get(ifound) != i))
+							++ifound;
+
+						if (ifound < solution.size()){ // found at...
+							//System.out.println(solution.toString());
+							//System.out.println("found at vector i="+ifound+" with size="+solution.size());
+							if (ifound == 0){ // beginning, x = (reserved)i1 + i2
+								int reserved = data[solution.get(ifound)][solution.get(ifound+1)];
+								completeTour += reserved + getMinRowAfterX(i, reserved);
+							}
+							else if (ifound == solution.size()-1){ // end, x = (reserved)i1 + i2
+								int reserved = data[solution.get(ifound)][solution.get(ifound-1)];
+								completeTour += reserved + getMinRowAfterX(i, reserved);
+							}
+							else{ // middle, x = (reserved)i1 + (reserved)i2
+								int reserved1 = data[solution.get(ifound)][solution.get(ifound+1)];
+								int reserved2 = data[solution.get(ifound)][solution.get(ifound-1)];
+								completeTour += reserved1 + reserved2;
+							}
+						}
+						else{
+							completeTour += countSumOfTwoMinRow(i); // x = i1 + i2
+						}
+
+					}
+
+					pq.add(new Pair<Integer, Vector<Integer>>(completeTour, solution));
+				}
 			}
 		}
+		pq.peek().getSecond().add(FIRST_NODE);
+
+		System.out.println("Solusi: " + pq.peek().getSecond().toString());
+		System.out.println("Jarak Minimum: " + pq.peek().getFirst()/2);
+
 
 	}
 
@@ -183,12 +231,19 @@ public class MatrixGraph {
 		return min;
 	}
 
-	private int getFirstMinRow(int r) {
-		return getMinRow(r);
-	}
-
-	private int getFirstMinCol(int c) {
-		return getMinCol(c);
+	private int getMinRowAfterX(int r, int x) {
+		int min = Integer.MAX_VALUE;
+		boolean firstOcc = false;
+		for(int j=0; j<size; j++){
+			if ((data[r][j] == x) && !firstOcc){
+				firstOcc = true;
+			}
+			else{
+				if (data[r][j] < min)
+					min = data[r][j];
+			}
+		}
+		return min;
 	}
 
 	private int countSumOfTwoMinRow(int r) {
@@ -212,21 +267,6 @@ public class MatrixGraph {
 			sum += countSumOfTwoMinRow(i);
 		}
 		return sum;
-	}
-
-	private int getSecondMinCol(int c) {
-		int first, second;
-		first = second = Integer.MAX_VALUE;
-		for(int i=0; i<size; i++){
-			if (data[i][c] < first){
-				second = first;
-				first = data[i][c];
-			}
-			else if ((data[i][c] >= first) && (data[i][c] < second)){
-				second = data[i][c];
-			}
-		}
-		return second;
 	}
 
 	private int reduceRow(int r) {
