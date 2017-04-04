@@ -1,8 +1,9 @@
 /* NIM/Nama : 13515057 / Erick Wijaya */
 /* File     : MatrixGraph.java        */
 
-import java.io.*;
 import java.util.*;
+import org.graphstream.graph.*;
+import org.graphstream.graph.implementations.*;
 
 public class MatrixGraph {
 	private int[][] data;
@@ -67,6 +68,14 @@ public class MatrixGraph {
 			}
 			System.out.println();
 		}
+	}
+
+	public void display() {
+	    Graph graph = new SingleGraph("MyGraph");
+	    for(int i=0; i<size; i++){
+	        graph.addNode(String.valueOf(i));
+        }
+        graph.display();
 	}
 
 	public int getSize(){
