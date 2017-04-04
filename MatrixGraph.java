@@ -81,12 +81,16 @@ public class MatrixGraph {
 		PriorityQueue<Triplet<MatrixGraph, Integer, Vector<Integer>>> pq = new
 			PriorityQueue<Triplet<MatrixGraph, Integer, Vector<Integer>>>(1, new MatrixGraphTripletComparator());
 
+		long startTime = System.nanoTime();
+
 		// insert first node to pq
 		MatrixGraph mg = new MatrixGraph(this);
 		Integer firstReduce = mg.reduceAll();
 		Vector<Integer> firstSolution = new Vector<Integer>(1);
 		firstSolution.add(FIRST_NODE);
 		pq.add(new Triplet<MatrixGraph, Integer, Vector<Integer>>(mg, firstReduce, firstSolution));
+
+		int liveNode = 1;
 
 		// b&b
 		while (pq.peek().getThird().size() < size) {
@@ -117,6 +121,7 @@ public class MatrixGraph {
 					//System.out.println("cost: " + cost);
 					//branch.print();System.out.println();
 
+					++liveNode;
 					pq.add(new Triplet<MatrixGraph, Integer, Vector<Integer>>(branch, cost, solution));
 
 					/*branch.print(); System.out.println("cost:"+cost);
@@ -125,20 +130,26 @@ public class MatrixGraph {
 			}
 		}
 		pq.peek().getThird().add(FIRST_NODE);
+		long endTime = System.nanoTime();
 
 		System.out.println("Solusi: " + pq.peek().getThird().toString());
-		System.out.println("Jarak Minimum: " + pq.peek().getSecond());
+		System.out.println("Bobot: " + pq.peek().getSecond());
+		System.out.println("Jumlah Simpul Hidup: " + liveNode);
+		System.out.printf("Waktu Eksekusi: %.2fms\n", (double)(endTime - startTime) / 1000000);
 	}
 
 	public void tsp2() {
 		PriorityQueue<Pair<Integer, Vector<Integer>>> pq = new
 			PriorityQueue<Pair<Integer, Vector<Integer>>>(1, new MatrixGraphPairComparator());
 
+		long startTime = System.nanoTime();
+
 		// insert first node to pq
 		Vector<Integer> firstSolution = new Vector<Integer>(1);
 		firstSolution.add(FIRST_NODE);
 		pq.add(new Pair<Integer, Vector<Integer>>(countSumOfTwoMinAllRow(), firstSolution));
 
+		int liveNode = 1;
 		// b&b
 		while (pq.peek().getSecond().size() < size){
 			Pair<Integer, Vector<Integer>> head = pq.poll();
@@ -186,16 +197,18 @@ public class MatrixGraph {
 
 					}
 
+					++liveNode;
 					pq.add(new Pair<Integer, Vector<Integer>>(completeTour, solution));
 				}
 			}
 		}
 		pq.peek().getSecond().add(FIRST_NODE);
+		long endTime = System.nanoTime();
 
 		System.out.println("Solusi: " + pq.peek().getSecond().toString());
-		System.out.println("Jarak Minimum: " + pq.peek().getFirst()/2);
-
-
+		System.out.println("Bobot: " + pq.peek().getFirst()/2);
+		System.out.println("Jumlah Simpul Hidup: " + liveNode);
+		System.out.printf("Waktu Eksekusi: %.2fms\n", (double)(endTime - startTime) / 1000000);
 	}
 
 	/* PRIVATE FUNCTION FOR TSP1 AND TSP2 */
