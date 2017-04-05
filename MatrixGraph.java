@@ -11,7 +11,7 @@ public class MatrixGraph {
 	private static final int UNDEF = Integer.MAX_VALUE;
 	private static final int FIRST_NODE = 0;
 
-  /* PUBLIC FUNCTION & CTOR */
+    /* PUBLIC FUNCTION & CTOR */
 	public MatrixGraph(Scanner in) {
 		size = in.nextInt();
 		data = new int[size][size];
@@ -135,6 +135,8 @@ public class MatrixGraph {
 
 		int lowest = pq.peek().getSecond();
 		int counter = 0;
+        long startDisplay = 0;
+        long endDisplay = 0;
 		System.out.println("REDUCED COST MATRIX\n");
 		do {
             Triplet<MatrixGraph, Integer, Vector<Integer>> head = pq.poll();
@@ -151,9 +153,10 @@ public class MatrixGraph {
                 System.out.println("Bobot: " + head.getSecond());
                 System.out.println("Jarak Minimum: " + minDistance);
                 System.out.println("Jumlah Simpul yang dibangkitkan: " + liveNode);
-                System.out.printf("Waktu Eksekusi: %.2fms\n\n", (double) (endTime - startTime) / 1000000);
+                System.out.printf("Waktu Eksekusi: %.2fms\n\n", (double) (endTime - startTime - (endDisplay - startDisplay)) / 1000000);
 
                 // Graph GUI
+                startDisplay = System.nanoTime();
                 System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
                 Graph graph = new MultiGraph("MyGraph");
                 graph.setStrict(false);
@@ -176,8 +179,8 @@ public class MatrixGraph {
                     int y = head.getThird().get(i + 1);
                     graph.getEdge(String.valueOf(x) + String.valueOf(y)).addAttribute("ui.style", "fill-color: red; size: 2px; text-size: 20px; text-color: blue; text-alignment: above; text-style: bold;");
                 }
-
                 graph.display();
+                endDisplay = System.nanoTime();
             }
             // else continue b&b
             else{
@@ -274,6 +277,8 @@ public class MatrixGraph {
 		}
         int lowest = pq.peek().getFirst();
         int counter = 0;
+        long startDisplay = 0;
+        long endDisplay = 0;
         System.out.println("BOBOT TUR LENGKAP\n");
 
         do {
@@ -292,19 +297,20 @@ public class MatrixGraph {
                 System.out.println("Bobot: " + head.getFirst()/2);
                 System.out.println("Jarak Minimum: " + minDistance);
                 System.out.println("Jumlah Simpul yang dibangkitkan: " + liveNode);
-                System.out.printf("Waktu Eksekusi: %.2fms\n\n", (double) (endTime - startTime) / 1000000);
+                System.out.printf("Waktu Eksekusi: %.2fms\n\n", (double) (endTime - startTime - (endDisplay - startDisplay)) / 1000000);
 
+                startDisplay = System.nanoTime();
                 System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
                 Graph graph = new MultiGraph("MyGraph");
                 graph.setStrict(false);
                 graph.setAutoCreate(true);
                 for (int i = 0; i < size; i++) {
-                    for (int j = 0; j < size; j++) {
-                        if (i != j) {
-                            graph.addEdge(String.valueOf(i) + String.valueOf(j), String.valueOf(i), String.valueOf(j), true);
+                    for (int j = i+1; j < size; j++) {
+                    //   if (i != j) {
+                            graph.addEdge(String.valueOf(i) + String.valueOf(j), String.valueOf(i), String.valueOf(j), false);
                             graph.getEdge(String.valueOf(i) + String.valueOf(j)).addAttribute("ui.label", String.valueOf(data[i][j]));
                             graph.getEdge(String.valueOf(i) + String.valueOf(j)).addAttribute("ui.style", "fill-color: grey; text-size: 12px;");
-                        }
+                    //    }
                     }
                 }
                 for (Node n : graph) {
@@ -314,9 +320,14 @@ public class MatrixGraph {
                 for (int i = 0; i < head.getSecond().size() - 1; i++) {
                     int x = head.getSecond().get(i);
                     int y = head.getSecond().get(i + 1);
-                    graph.getEdge(String.valueOf(x) + String.valueOf(y)).addAttribute("ui.style", "fill-color: red; size: 2px; text-size: 20px; text-color: blue; text-alignment: above; text-style: bold;");
+                    Edge e = graph.getEdge(String.valueOf(x) + String.valueOf(y));
+                    if (e == null){
+                        e = graph.getEdge(String.valueOf(y) + String.valueOf(x));
+                    }
+                    e.addAttribute("ui.style", "fill-color: red; size: 2px; text-size: 20px; text-color: blue; text-alignment: above; text-style: bold;");
                 }
                 graph.display();
+                endDisplay = System.nanoTime();
             }
             // else continue b&b
             else{
@@ -356,7 +367,6 @@ public class MatrixGraph {
 
                         }
                         ++liveNode;
-                        //System.out.println(solution.toString());
                         pq.add(new Pair<Integer, Vector<Integer>>(completeTour, solution));
                     }
                 }
