@@ -11,7 +11,6 @@ class Main {
 
       MatrixGraph reducedCostMatrix = new MatrixGraph(in);
       reducedCostMatrix.tsp1();
-      reducedCostMatrix.display();
 
       System.out.println();
       
