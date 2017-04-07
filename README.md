@@ -1,2 +1,3 @@
-# tc2-stima-sort
-Tucil 2 Stima - Sorting
+#Tugas Kecil 2 IF2211
+#Divide and Conquer
+#Algoritma Sorting
