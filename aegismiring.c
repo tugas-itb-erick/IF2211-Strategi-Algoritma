@@ -32,6 +32,7 @@ void Turn(int dir);
 // dir=1 -> turn left
 // dir=2 -> turn right
 // dir=3 -> turn behind
+void TurnHalf(int dir);
 void TurnTimed(int dir, int t);
 // Turn to dir direction in t milliseconds
 void CheckPath(bool *l, bool *m, bool *r);
@@ -109,6 +110,29 @@ void Turn(int dir){
 		setMotorSpeed(leftMotor, speed);
 		setMotorSpeed(rightMotor, -speed);
 		repeatUntil(getGyroDegrees(gyroSensor) >= 179){}
+	}
+	setMotorSpeed(leftMotor, 0);
+	setMotorSpeed(rightMotor, 0);
+}
+
+void TurnHalf(int dir){
+	int speed = 30;
+
+	resetGyro(gyroSensor);
+	if (dir == 1){
+		setMotorSpeed(leftMotor, -speed);
+		setMotorSpeed(rightMotor, speed);
+		repeatUntil(getGyroDegrees(gyroSensor) <= -44){}
+	}
+	else if (dir == 2){
+		setMotorSpeed(leftMotor, speed);
+		setMotorSpeed(rightMotor, -speed);
+		repeatUntil(getGyroDegrees(gyroSensor) >= 44){}
+	}
+	else{
+		setMotorSpeed(leftMotor, speed);
+		setMotorSpeed(rightMotor, -speed);
+		repeatUntil(getGyroDegrees(gyroSensor) >= 89){}
 	}
 	setMotorSpeed(leftMotor, 0);
 	setMotorSpeed(rightMotor, 0);
@@ -216,6 +240,8 @@ void DFS(){
 	bool v_left[MAX]; // visited array
 	bool v_right[MAX]; // visited array
 	bool v_mid[MAX]; // visited array
+	bool v_mleft[MAX]; // visited array
+	bool v_mright[MAX]; // visited array
 	bool dead_end = false;
 	int top;
 
@@ -226,6 +252,8 @@ void DFS(){
 		v_left[i] = false;
 		v_right[i] = false;
 		v_mid[i] = false;
+	  v_mleft[i] = false;
+	  v_mright[i] = false;
 	}
 
 	while(true){
@@ -252,7 +280,7 @@ void DFS(){
 
 					// displayString(5, "Path Found: %d %d %d", v_left[lv], v_mid[lv], v_right[lv]);
 
-					if (v_left[lv]){
+					if (v_left[lv] && (v_mid[lv] || v_right[lv])){
 						Turn(1);
 						v_left[lv] = false;
 						Push(&S, 1);
@@ -260,10 +288,29 @@ void DFS(){
 						MoveForwardTimed(800);
 						v_mid[lv] = false;
 						Push(&S, 2);
-					}else{
+					}else if (v_right[lv]){
 						Turn(2);
 						v_right[lv] = false;
 						Push(&S, 3);
+					}
+
+					if (!v_left[lv] && !v_mid[lv] && !v_right[lv]){
+						TurnHalf(1);
+						MoveForwardTimed(800);
+						Push(&S, 4);
+						v_right[lv] = true;
+					}
+					else if (!v_left[lv] && !v_mid[lv]){
+						TurnHalf(1);
+						MoveForwardTimed(800);
+						Push(&S, 4);
+						v_right[lv] = true;
+					}
+					else if (!v_right[lv] && !v_mid[lv]){
+						Turn(1);
+						v_left[lv] = false;
+						Push(&S, 4);
+						v_right[lv] = true;
 					}
 
 					for(i = 0; i <= lv; i++){
@@ -304,8 +351,14 @@ void DFS(){
 							dead_end = true;
 						}
 					}
-					else{ // top == 3;
+					else if (top == 3){
 						Turn(1); // backtrack
+						--lv;
+						dead_end = true;
+					}
+					else {
+						TurnHalf(1);
+						MoveForwardTimed(400);
 						--lv;
 						dead_end = true;
 					}
@@ -366,6 +419,8 @@ void BFS(){
 	bool v_left[MAX]; // visited array
 	bool v_right[MAX]; // visited array
 	bool v_mid[MAX]; // visited array
+	bool v_mleft[MAX]; // visited array
+	bool v_mright[MAX]; // visited array
 	bool dead_end;
 	bool solution = false;
 	bool everGreen;
@@ -377,6 +432,8 @@ void BFS(){
 		v_left[i] = false;
 		v_right[i] = false;
 		v_mid[i] = false;
+		v_mleft[i] = false; // visited array
+	  v_mright[i] = false; // visited array
 	}
 
 	int idx[10];
@@ -423,9 +480,9 @@ void BFS(){
 							// displayString(5, "Path Found: %d %d %d", v_left[lv], v_mid[lv], v_right[lv]);
 
 							++idx[lv];
-							if (lv == max_lv-1){
+				/*			if (lv == max_lv-1){*/
 
-								if (v_left[lv]){
+								if (v_left[lv] && (v_mid[lv] || v_right[lv])){
 									Turn(1);
 									v_left[lv] = false;
 									Push(&S, 1);
@@ -433,12 +490,32 @@ void BFS(){
 									MoveForwardTimed(800);
 									v_mid[lv] = false;
 									Push(&S, 2);
-								}else {
+								}else if (v_right[lv]){
 									Turn(2);
 									v_right[lv] = false;
 									Push(&S, 3);
 								}
-							}
+
+								if (!v_left[lv] && !v_mid[lv] && !v_right[lv]){
+									TurnHalf(1);
+									MoveForwardTimed(800);
+									Push(&S, 4);
+									v_right[lv] = true;
+								}
+								else if (!v_left[lv] && !v_mid[lv]){
+									TurnHalf(1);
+									MoveForwardTimed(800);
+									Push(&S, 4);
+									v_right[lv] = true;
+								}
+								else if (!v_right[lv] && !v_mid[lv]){
+									Turn(1);
+									v_left[lv] = false;
+									Push(&S, 4);
+									v_right[lv] = true;
+								}
+
+	/*						}
 							else{
 								if (v_left[lv] && !L[idx[lv]]){
 									Turn(1);
@@ -461,7 +538,7 @@ void BFS(){
 									v_right[lv] = false;
 
 
-							}
+							}*/
 
 							for(i = 0; i <= lv; i++){
 								displayString(5+i, "(%d) Branching to %d", i, Info(S, i));
@@ -515,11 +592,18 @@ void BFS(){
 								dead_end = true;
 							}
 						}
-						else{ // top == 3;
+						else if (top == 3){
 							Turn(1); // backtrack
 							--lv;
 							dead_end = true;
 						}
+						else {
+							TurnHalf(1);
+							MoveForwardTimed(400);
+							--lv;
+							dead_end = true;
+						}
+
 
 						for(i = 0; i <= lv; i++){
 							displayString(5+i, "(%d) Branching to %d", i, Info(S, i));
@@ -560,7 +644,7 @@ void BFS(){
 
 		}
 
-		if (!everGreen && !solution){
+		if (!everGreen){
 			while (!IsBlue())
 				FollowBlackLine();
 			break;
@@ -601,7 +685,7 @@ task main()
 	while (!IsBlack())
 		MoveForward();
 	MoveForwardTimed(500);
-/*
+
 	// Start DFS
 	DFS();
 
@@ -609,11 +693,11 @@ task main()
 	motor[leftMotor] = 0;
 	motor[rightMotor] = 0;
 	sleep(2000);
-*/
+
 	// Prepare Robot Position to do BFS
 	eraseDisplay();
 	displayCenteredTextLine(1, "Aegis The Maze Solver");
-	//Turn(3);
+	Turn(3);
 
 	// Start BFS
 	BFS();

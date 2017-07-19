@@ -260,11 +260,24 @@ void DFS(){
 						MoveForwardTimed(800);
 						v_mid[lv] = false;
 						Push(&S, 2);
-					}else{
+					}else if (v_right[lv]){
 						Turn(2);
 						v_right[lv] = false;
 						Push(&S, 3);
 					}
+								if (v_left[lv] && !v_mid[lv] && !v_right[lv]){
+									v_right[lv] = true;
+								} else if (!v_left[lv] && !v_mid[lv] && !v_right[lv]){
+									Turn(1);
+									Push(&S, 1);
+									v_right[lv] = true;
+								} else if (!v_left[lv] && !v_mid[lv] && v_right[lv]){
+									int tes;
+									Pop(&S, &tes);
+									Push(&S, 1);
+									Turn(1); Turn(400);
+									MoveForwardTimed(500);
+								}
 
 					for(i = 0; i <= lv; i++){
 						displayString(5+i, "(%d) Branching to %d", i, Info(S, i));
@@ -433,11 +446,26 @@ void BFS(){
 									MoveForwardTimed(800);
 									v_mid[lv] = false;
 									Push(&S, 2);
-								}else {
+								}else if (v_right[lv]){
 									Turn(2);
 									v_right[lv] = false;
 									Push(&S, 3);
 								}
+
+								if (v_left[lv] && !v_mid[lv] && !v_right[lv]){
+									v_right[lv] = true;
+								} else if (!v_left[lv] && !v_mid[lv] && !v_right[lv]){
+									Turn(1);
+									Push(&S, 1);
+									v_right[lv] = true;
+								} else if (!v_left[lv] && !v_mid[lv] && v_right[lv]){
+									int tes;
+									Pop(&S, &tes);
+									Push(&S, 1);
+									Turn(1); Turn(400);
+									MoveForwardTimed(500);
+								}
+
 							}
 							else{
 								if (v_left[lv] && !L[idx[lv]]){
@@ -560,7 +588,7 @@ void BFS(){
 
 		}
 
-		if (!everGreen && !solution){
+		if (!everGreen){
 			while (!IsBlue())
 				FollowBlackLine();
 			break;
@@ -601,7 +629,7 @@ task main()
 	while (!IsBlack())
 		MoveForward();
 	MoveForwardTimed(500);
-/*
+
 	// Start DFS
 	DFS();
 
@@ -609,11 +637,11 @@ task main()
 	motor[leftMotor] = 0;
 	motor[rightMotor] = 0;
 	sleep(2000);
-*/
+
 	// Prepare Robot Position to do BFS
 	eraseDisplay();
 	displayCenteredTextLine(1, "Aegis The Maze Solver");
-	//Turn(3);
+	Turn(3);
 
 	// Start BFS
 	BFS();
