@@ -1,0 +1,1 @@
+gcc list.c mlist.c stack/stack.c queue/queue.c -o mlist
