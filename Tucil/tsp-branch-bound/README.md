@@ -1,2 +1,2 @@
-# tsp-branch-n-bound
+# Traveling Salesperson Problem
 Tugas Kecil Stima 3 : TSP dengan Branch and Bound
