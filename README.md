@@ -12,4 +12,4 @@ Repositori Tugas IF2211 Strategi Algoritma
 3. [Traveling Salesperson Problem (Branch & Bound)](https://github.com/tugas-itb-erick/IF2211-Strategi-Algoritma/tree/master/Tucil/tsp-branch-bound)
 
 **Makalah:**
-1. [Penerapan Program Dinamis dengan Jarak Levenshtein untuk Mendeteksi Plagiarisme Karya Ilmiah dan Kode Program.pdf](http://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2016-2017/Makalah2017/Makalah-IF2211-2017-093)
+1. [Penerapan Program Dinamis dengan Jarak Levenshtein untuk Mendeteksi Plagiarisme Karya Ilmiah dan Kode Program](http://informatika.stei.itb.ac.id/~rinaldi.munir/Stmik/2016-2017/Makalah2017/Makalah-IF2211-2017-093.pdf)
